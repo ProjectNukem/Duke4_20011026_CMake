@@ -1,4 +1,5 @@
 # Prerequisites
+* [CMake](https://cmake.org/)
 * [Visual Studio 6 (**Build 8168**)](https://winworldpc.com/product/microsoft-visual-stu/60)
 * [MASM 6.11](https://archive.org/details/en_masm611) + 6.13 Update
 * Duke Nukem Forever (2001)
