@@ -31,3 +31,6 @@ With this:
 ```
 
 5. Run `build_vc6_release.cmd` or `build_vc6_debug.cmd`
+
+# Visual Studio 2022
+The `generate_vc17.cmd` script will generate a Visual Studio 2022 solution in `/Duke4/Build/VS2022/`. This is intended primarily for browsing and editing, an unmodified DNF 2001 source tree will not compile with modern Visual Studio tools.
