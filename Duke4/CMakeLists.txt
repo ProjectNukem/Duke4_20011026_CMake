@@ -1,29 +1,49 @@
-cmake_minimum_required(VERSION 3.00)
+cmake_minimum_required(VERSION 3.13)
 project(Duke4 C CXX ASM_MASM ASM_NASM)
 
 # Output binaries to the System directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/System)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-# Set configuration-specific compiler flags
-set(CMAKE_C_FLAGS_RELEASE "/MD /O2 /Ob2 /DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-set(CMAKE_C_FLAGS_DEBUG "/MDd /Od /D_DEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # There are multiple locations in the source that invoke
 # va_start with a C++ reference. Newer versions of VS need
 # this to be defined in order to suppress errors for it.
 add_compile_definitions(_CRT_NO_VA_START_VALIDATION)
 
+# CRT warnings can become noisy when using newer tooling.
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+
 # Add default compile options (structure packing, etc)
-add_compile_options("/G6" "/GX" "/vd0" "/Zp4")
+add_compile_options("/EHsc" "/vd0" "/Zp4")
 add_compile_definitions(WINDOWS_IGNORE_PACKING_MISMATCH)
 
-# Add MSVC conformance options
+# Enable /G6 (optimize for Pentium Pro) on VS5 and VS6
+if (MSVC_VERSION EQUAL 1100 OR MSVC_VERSION EQUAL 1200)
+    add_compile_definitions("/G6")
+endif()
+
+# Add MSVC conformance and compatibility options
 if (MSVC_VERSION GREATER_EQUAL 1400)
-    add_compile_options("/Zc:forScope-" "/Zc:wchar_t-")
+    # Force Conformance in for Loop Scope
+    add_compile_options("/Zc:forScope-")
+
+    # wchar_t Is Native Type
+    add_compile_options("/Zc:wchar_t-")
+
+    # Call member new/delete on arrays
+    add_compile_options("/Zc:zeroSizeArrayNew-")
+
+    # Assume operator new throws
+    add_compile_options("/Zc:throwingNew-")
+
+    # Enable Global Sized Deallocation Functions
+    add_compile_options("/Zc:sizedDealloc-")
+
+    # Disable safe exception handlers
+    add_link_options("/SAFESEH:NO")
 endif()
 
 # Environment
@@ -72,3 +92,20 @@ add_subdirectory(UCC)
 add_subdirectory(UWeb)
 add_subdirectory(xcore)
 add_subdirectory(ximage)
+
+# Galaxy needs to be assembled using MASM 6.13, so we need to ensure it uses the proper binary.
+set_target_properties(GalaxyLib PROPERTIES VS_USER_PROPS "${CMAKE_SOURCE_DIR}/../VS6/Masm.props")
+
+if (MSVC_VERSION GREATER 1200)
+    set(MSVC6_LIB_DIR "${CMAKE_SOURCE_DIR}/../VS6/VC98/LIB")
+
+    # Cannibal needs to be manually linked to MSVCIRT from VS6 under newer compilers, because of MRG.
+    target_link_libraries(Cannibal PRIVATE debug "${MSVC6_LIB_DIR}/MSVCIRTd.lib")
+    target_link_libraries(Cannibal PRIVATE optimized "${MSVC6_LIB_DIR}/MSVCIRT.lib")
+endif()
+
+if (MSVC_VERSION GREATER_EQUAL 1400)
+    # Launch is not compatible with data execution prevention.
+    # This is necessary to avoid crashes when executing code in Galaxy.
+    target_link_options(Launch PRIVATE "/NXCOMPAT:NO")
+endif()

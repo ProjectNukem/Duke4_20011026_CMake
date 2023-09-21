@@ -1,4 +1,5 @@
 *
 !*/
 !.gitignore
+!Masm.props
 !VC98/BIN/VCVARS32.BAT
