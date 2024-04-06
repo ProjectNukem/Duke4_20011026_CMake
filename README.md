@@ -9,7 +9,7 @@
 2. Open `VSE600ENU1.ISO` and copy the `COMMON` and `VC98` directories into the `VS6` directory.
     * Do not overwrite the existing `VCVARS32.BAT` script!
 3. Install MASM 6.11 and update it to MASM 6.13, then copy the contents of the `BIN` directory into `/VS6/VC98/BIN/`.
-    * A pre-patched `BIN` directory is available [here](https://cdn.discordapp.com/attachments/309328208464183296/1154082976737542164/MASM613.7z).
+    * A pre-patched `BIN` directory is available [here](https://drive.google.com/file/d/1gV12VkdRFAXTOTqS23YNEx6vqdELukHb/view?usp=sharing).
 4. Open `/Cannibal/CpjLod.cpp` and replace this block:
 
 ```cpp
